@@ -38,7 +38,7 @@
 
 严格来说这不能算"飞行"——它根本没有脱离地面人员的扶持和控制。但它证明了**垂直升力足以托起一个人加一台发动机**，这是零的突破。
 
-![Breguet-Richet Gyroplane No.1, 1907](https://commons.wikimedia.org/wiki/Special:FilePath/Breguet_Gyroplane_1907.jpg?width=700 "Breguet-Richet Gyroplane No.1 — 人类第一架载人四旋翼，1907年")
+![Breguet-Richet Gyroplane No.1, 1907](images/breguet-gyroplane-1907.jpg)
 
 > *Breguet-Richet Gyroplane No.1（1907）。四根钢管臂十字交叉，每臂上一对4叶旋翼，共8个旋翼，由一台46马力Antoinette发动机驱动。来源：Wikimedia Commons*
 
@@ -57,7 +57,7 @@
 
 Œhmichen是第一个让四旋翼真正实现**可控飞行**的人。他的多桨布局虽然复杂到没有实用价值，但在飞行控制理论上走在了时代前面。他后来建造了六架不同的垂直起降机器，1939年退出工程界转教生物力学。他谦逊地说："我不是直升机的发明者，那是达·芬奇在1486年设计旋翼机时就完成的。"
 
-![Œhmichen No.2, 1923-1924](https://en.wikipedia.org/wiki/Special:FilePath/Oemichen2.jpg?width=700 "Étienne Œhmichen的No.2直升机，1923-1924年")
+![Œhmichen No.2, 1923-1924](images/oehmichen-no2-1924.jpg)
 
 > *Œhmichen No.2（摄于1923-1924年）。四副两叶旋翼 + 八副辅助螺旋桨，一台180马力Gnome发动机驱动。1924年5月4日首次完成1公里闭环航线飞行。来源：Wikimedia Commons*
 
@@ -78,7 +78,7 @@
 
 但"飞行章鱼"的操控性始终极差——前飞需要顺风才能完成，飞行员工作负荷巨大。加上de Bothezat本人性格难缠，陆军在1924年取消合同并将飞机肢解报废。唯一存世的是操纵柱，现存于史密森尼学会Udvar-Hazy中心。
 
-![de Bothezat Flying Octopus, 1922](https://commons.wikimedia.org/wiki/Special:FilePath/Helicopter%20designed%20by%20George%20de%20Bothezat%2C%20in%20flight%20at%20McCook%20field.%20(38d278b9-0a37-4286-8575-7b1b16f66d19).jpg?width=700 "de Bothezat Flying Octopus — 美国陆军四旋翼，1922年")
+![de Bothezat Flying Octopus, 1922](images/debothezat-flying-octopus-1922.jpg)
 
 > *de Bothezat "飞行章鱼"在俄亥俄州代顿McCook机场试飞（1922-1923）。四副六叶旋翼，一台Le Rhône 180马力发动机。爱迪生曾致电祝贺："你造出了第一架成功的直升机。" 来源：Smithsonian Institution / Wikimedia Commons*
 
@@ -183,7 +183,7 @@ de Bothezat、Convertawings等先驱实际上都意识到了这个问题，他�
 
 AR.Drone的意义在于：它把飞行器从"航模爱好者的专业门槛"拉低到了"下载一个App就能玩"的消费电子门槛。到2012年，AR.Drone的全球销量超过50万台——这个数字在当时是革命性的。
 
-![Parrot AR.Drone 2.0](https://commons.wikimedia.org/wiki/Special:FilePath/Parrot_AR.Drone_2.JPG?width=700 "Parrot AR.Drone 2.0")
+![Parrot AR.Drone 2.0](images/parrot-ardrone-2.jpg)
 
 > *Parrot AR.Drone 2.0（2012）。通过Wi-Fi连接手机操控，配备超声波高度计和下视摄像头实现自动悬停，机身护框采用发泡聚丙烯（EPP），室内可安全碰撞。来源：Wikimedia Commons*
 
@@ -298,7 +298,7 @@ AR.Drone的意义在于：它把飞行器从"航模爱好者的专业门槛"拉�
 
 这些陀螺仪的共同特点：**拳头大小、千元级成本、怕震动**——完全不可能装进几百克重的小型四旋翼。
 
-![MPU-6050 6-axis MEMS IMU](https://upload.wikimedia.org/wikipedia/commons/c/c9/InvenSense_MPU-6050_6-axis_gyroscope_and_accelerometer_module%2C_MPU-6050.jpg?width=640 "InvenSense MPU-6050 6轴MEMS IMU模块")
+![MPU-6050 6-axis MEMS IMU](images/mpu6050-imu.jpg)
 
 > *InvenSense MPU-6050（2010年发布）——全球首款集成3轴陀螺仪+3轴加速度计的6轴MEMS单芯片，价格仅数美元。指甲盖大小，替代了拳头大小的机械陀螺，彻底引爆消费级无人机应用。来源：Wikimedia Commons*
 
@@ -569,7 +569,7 @@ BetaFlight的成功不仅在于代码本身，更在于它连接了FPV生态系�
 - 在大角度机动中姿态跟踪误差显著优于基于欧拉角和四元数的传统方案
 - 计算效率允许在嵌入式飞控硬件上实时运行
 
-![Shuo Yang et al. 2015 — SO(3) geometric control experiment](https://www.semanticscholar.org/paper/High-performance-full-attitude-control-of-a-on-Yu-Yang/a341e2975a0bd9e5e4c9f224289bf7e73fd1964a/figure/4 "SO(3)几何控制实验")
+![Shuo Yang et al. 2015 — SO(3) geometric control experiment](images/shuo-yang-so3-control-2015.jpg)
 
 > *杨硕等人2015年ICRA论文中的实验系统与飞行轨迹图（Figure 5）。展示了基于SO(3)几何控制的四旋翼全姿态机动能力。来源：Yu, Yang et al., ICRA 2015 / Semantic Scholar*
 
@@ -609,11 +609,11 @@ BetaFlight的成功不仅在于代码本身，更在于它连接了FPV生态系�
 | 2016 | 御（Mavic Pro）：折叠机身，便携性革命 |
 | 2018至今 | 行业级（Matrice/Agras）、手持云台（Ronin/Osmo）、教育（RoboMaster）全面扩张 |
 
-![DJI Phantom 3 Advanced](https://commons.wikimedia.org/wiki/Special:FilePath/2015_Dron_DJI_Phantom_3_Advanced.JPG?width=700 "DJI Phantom 3 Advanced")
+![DJI Phantom 3 Advanced](images/dji-phantom3.jpg)
 
 > *DJI Phantom 3 Advanced（2015）。搭载MPU6500六轴IMU（约$10），结合扩展卡尔曼滤波实现±0.5米悬停精度。消费级航拍从此有了专业级的稳定性。来源：Wikimedia Commons*
 
-![DJI Mavic Pro](https://commons.wikimedia.org/wiki/Special:FilePath/DJI_MavicPro.jpg?width=700 "DJI Mavic Pro")
+![DJI Mavic Pro](images/dji-mavic-pro.jpg)
 
 > *DJI Mavic Pro（2016）。折叠机身收起后仅水瓶大小，开启了消费级便携无人机时代。来源：Wikimedia Commons*
 

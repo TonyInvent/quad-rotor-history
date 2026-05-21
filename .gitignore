@@ -1,0 +1,2 @@
+# Ignore dotfiles but keep tracked ones
+.DS_Store
