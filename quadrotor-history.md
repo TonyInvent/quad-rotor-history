@@ -9,7 +9,7 @@
 5. [电机与电调的进化：多旋翼的动力心脏](#电机与电调的进化多旋翼的动力心脏)
 6. [旋翼/螺旋桨的发展：从木质桨叶到碳纤维优化翼型](#旋翼螺旋桨的发展从木质桨叶到碳纤维优化翼型)
 7. [MEMS IMU革命：从机械陀螺到芯片级惯导](#mems-imu革命从机械陀螺到芯片级惯导)
-8. [开源飞控的崛起：MultiWii → ArduPilot → PX4/Pixhawk](#开源飞控的崛起multiwii--ardupilot--px4pixhawk)
+8. [开源飞控的崛起：MultiWii → ArduPilot → PX4/Pixhawk → BetaFlight](#开源飞控的崛起multiwii--ardupilot--px4pixhawk--betaflight)
 9. [控制算法演进：从PID到几何控制](#控制算法演进从pid到几何控制)
 10. [DJI与Shuo Yang的SO(3)几何控制（2015）](#dji与shuo-yang的so3几何控制2015)
 11. [消费级无人机的爆发与现代格局](#消费级无人机的爆发与现代格局)
@@ -395,6 +395,83 @@ Tridge（同时也是Samba和Rsync的核心开发者）带来了严谨的工程�
 
 2014年Linux基金会下成立**DroneCode基金会**（2016年ArduPilot因许可证分歧脱离，独立运营ardupilot.org）。2017年Lorenz Meier与Kevin Sartori创立**Auterion**，为PX4提供企业级商业支持。
 
+### BetaFlight与FPV竞速/花飞分支（2015–至今）：另一条演化路径
+
+前文所述的MultiWii → ArduPilot/PX4谱系，其设计目标是**自主飞行**——航点导航、留待、返航、避障。但在2014–2015年前后，一个完全不同的需求出现了：FPV（第一人称视角）竞速和花式飞行（freestyle）。飞手不再需要自动驾驶仪，他们需要的是**极致的操控响应和手感**。
+
+这就催生了开源飞控的第二条演化分支。
+
+#### 谱系：MultiWii → Baseflight → CleanFlight → BetaFlight
+
+```
+MultiWii (2010, ATmega328P, 8位)
+  └─ Baseflight (2012, Timecop aka "TC")
+       └─ CleanFlight (2014, Dominic Clifton aka "Hydra")
+            └─ BetaFlight (2015, Boris B.)
+```
+
+- **Baseflight（2012）**：日本/俄罗斯开发者Timecop将MultiWii的代码逻辑移植到32位STM32F1平台，抛弃Arduino IDE，采用纯C和Makefile构建。这是ST芯片首次进入航模飞控。但Timecop以强硬风格著称，拒绝接受多数社区贡献，代码和硬件设计闭源化倾向严重。
+
+- **CleanFlight（2014）**：英国开发者Dominic Clifton（Hydra）不满Baseflight的封闭，fork出CleanFlight。他重构了代码结构，引入配置器GUI，支持更多传感器和硬件目标，社区反馈热烈。CleanFlight成为2014–2015年间最活跃的32位开源飞控。
+
+- **BetaFlight（2015）**：Boris B.（社区代号borisbstyle）在CleanFlight基础上fork了BetaFlight，目标非常明确：**追求飞控性能的极限，不在乎GPS、航点等自主功能**。BetaFlight迅速吸引了FPV竞速和花飞社区的全部注意力，并发展出远超母项目的技术深度。
+
+#### 核心技术创新
+
+BetaFlight的成功来自于对"性能"的极端追求，这在传统自动驾驶仪飞控（ArduPilot/PX4）上是看不到的：
+
+**1. 超高更新率的PID环路**
+
+传统ArduPilot的PID回路运行在400Hz（2.5ms周期）。BetaFlight从最初的1kHz开始，持续推高更新率。到2017–2018年，典型配置已是8kHz PID + 32kHz陀螺仪采样（需要STM32F4/F7 + SPI陀螺仪）。更高的更新率意味着更低的控制延迟，飞手操控时感受到的"粘滞感"显著减少。
+
+**2. RPM滤波器（RPM Filter）**
+
+2018年前后，BetaFlight社区发现电机转速频率的振动会耦合进陀螺仪信号，迫使软件低通滤波器将截止频率设得很低（~90Hz），从而牺牲了控制带宽。解决方案是：通过电调协议（bidirectional DShot）实时获取电机转速，在FFT频域中精确地**在转速频率处设置陷波滤波器**——只滤除特定噪声频率，不损失其他频段的控制信号。这使滤波器截止频率从90Hz推高到250Hz+，控制响应大幅改善。
+
+**3. 动态陷波滤波器（Dynamic Notch Filter）**
+
+类似思路用于处理机架共振——实时FFT分析陀螺仪频谱，自动追踪机架共振峰的频率变化（例如因电池电压下降和螺旋桨负载变化导致的频率漂移），动态调整陷波滤波器中心频率。
+
+**4. 双向DShot协议**
+
+传统PWM/OneShot/MultiShot电调协议是单向的——飞控发送油门信号，电调盲执行，无反馈。BetaFlight推动了**bidirectional DShot**（DShot 300/600/1200双向版），电调在发送电机转速数据回飞控的同时接收油门指令。这是RPM滤波器的硬件基础，也是飞行器从"开环控制"走向"感知-响应"闭环的关键一步。
+
+**5. 反重力（Anti-Gravity）与Feed-Forward**
+
+BetaFlight在PID中引入了大量**前馈（feed-forward）**项。传统PID只能对已经发生的误差做出反应，而前馈可以根据摇杆输入预测飞机将要做的动作并提前补偿。Anti-Gravity是其中最著名的——当检测到快速油门变化时，瞬间提升I项增益，防止因电机快速加速造成的姿态掉头。对花飞玩家来说，这个功能是游戏规则的改变者——在做大油门筋斗、power loop等动作时，飞机不再"掉头"。
+
+#### 硬件平台的演进
+
+| 时期 | MCU | 陀螺仪采样 | 代表硬件 |
+|------|-----|-----------|---------|
+| 2015 | STM32F3 (72MHz) | 1kHz SPI | Naze32, SPRacingF3 |
+| 2016–2017 | STM32F4 (168MHz) | 8kHz SPI | Omnibus F4, Kakute F4 |
+| 2018–2020 | STM32F7 (216MHz) | 32kHz SPI | Matek F722, T-Motor F7 |
+| 2021–至今 | STM32H7 (480MHz) | 32kHz+ SPI | T-Motor H7, Foxeer H7 |
+
+#### 与ArduPilot/PX4的本质区别
+
+| 维度 | ArduPilot / PX4 | BetaFlight |
+|------|----------------|------------|
+| **设计目标** | 自主导航、航点、留待、返航、避障 | 手动操控手感、竞速、花式特技 |
+| **控制回路** | ~400Hz（姿态），关注稳定性与安全性 | 8kHz+（陀螺→PID→输出），关注延迟 |
+| **传感器** | GPS/RTK、磁罗盘、气压计、光流、激光雷达 | 陀螺仪为主（加速度计只用于定面），GPS极少使用 |
+| **通信协议** | MAVLink | MSP, CRSF |
+| **代码规模** | 百万行级C++ | 十万行级C |
+| **安全哲学** | 故障检测、冗余切换、地理围栏、失效保护 | 飞手即为最终安全机制；arm即飞 |
+| **生态系统** | 地面站（Mission Planner / QGC）、MAVSDK、DroneCode | BLHeli/Bluejay电调固件、OpenTX/EdgeTX遥控、FPV视频链路 |
+
+#### 社区与生态
+
+BetaFlight的成功不仅在于代码本身，更在于它连接了FPV生态系统的所有环节：
+
+- **BLHeli_S / Bluejay / AM32**：专为BetaFlight优化的开源电调固件，支持双向DShot和可变PWM频率
+- **OpenTX / EdgeTX**：开源遥控器操作系统，通过CRSF协议与BetaFlight飞控低延迟通信
+- **BetaFlight Configurator**：基于Chrome/Electron的图形化配置工具，交互式PID调参、滤波器调试、黑匣子分析
+- **Blackbox日志**：以陀螺仪采样率记录的完整飞行数据，社区开发了专门的频谱分析工具来辅助滤波器调参
+
+到2025年，BetaFlight已成为所有FPV竞速和花飞无人机的默认固件——几乎找不到一台BND（到手即飞）的FPV竞速机不预装BetaFlight或其衍生固件（EmuFlight、FlightOne等）。它和ArduPilot/PX4代表了开源飞控世界两种完全不同但同样成功的哲学：一个追求"让机器自己飞"，一个追求"让飞手感觉不到机器的存在"。
+
 ---
 
 ## 控制算法演进：从PID到几何控制
@@ -551,7 +628,7 @@ Tridge（同时也是Samba和Rsync的核心开发者）带来了严谨的工程�
 - **通信**：2.4GHz数字图传（DJI OcuSync/O4）、4G/5G低延迟链路
 - **软件**：从裸机C到NuttX/Linux实时系统，ROS/MAVLink标准化接口
 
-这是从1907年Breguet兄弟用绳子拽着四旋翼飞离地面0.6米起，走了整整一百多年才到达的地方。
+这是从1907年Breguet兄弟用绳子拽着四旋翼飞离地面0.6米起，走了整整一百多年才到达的地方。而与此同时，完全不同的FPV竞速/花飞生态（BetaFlight + BLHeli + OpenTX + 模拟/数字图传）也在独立生长，以8kHz+的PID回路和动态滤波技术追求另一种极致——不是让机器自己飞，而是让飞手感觉不到机器的存在。
 
 ---
 
@@ -569,11 +646,12 @@ Tridge（同时也是Samba和Rsync的核心开发者）带来了严谨的工程�
     结论：电动机+电池提供的瞬时推力响应，解决了燃气发动机的油门迟滞死结
 
 第三根支柱：聪明的感知与控制
-    1990s MEMS IMU → 2005 Arduino → 2010 MultiWii/MPU6050 → 2013 Pixhawk → 2015 SO(3)几何PID
+    1990s MEMS IMU → 2005 Arduino → 2010 MultiWii/MPU6050 → 2013 Pixhawk → 2015 BetaFlight/ArduPilot双分支 → 2015 SO(3)几何PID
     结论：廉价的高精度惯性传感器 + 足够算力的MCU + 正确的数学描述 = 可控飞行
+    飞控软件在此处分叉为两条路：自主导航（ArduPilot/PX4）与极致操控（BetaFlight），各自走向了不同的极致
 ```
 
-当三根支柱在同一时代（2005–2015）聚齐时，四旋翼从百年梦想变成了百亿美元产业。这不是一条平滑的技术演进曲线，而是一个在沉默中积蓄了几乎整个20世纪，然后在短短的十年窗口内爆发的故事。
+当三根支柱在同一时代（2005–2015）聚齐时，四旋翼从百年梦想变成了百亿美元产业。这不是一条平滑的技术演进曲线，而是一个在沉默中积蓄了几乎整个20世纪，然后在短短的十年窗口内爆发的故事。开源飞控的两条分支——一端追求"让机器自己飞"，一端追求"让飞手忘记机器的存在"——共同构成了这个产业的软件基石。
 
 ---
 
@@ -589,6 +667,8 @@ Tridge（同时也是Samba和Rsync的核心开发者）带来了严谨的工程�
 - MultiWii project archives: RCGroups, *"MultiWiiCopter – build your own flight controller"*, 2010.
 - ArduPilot project history: https://ardupilot.org/copter/docs/common-history-of-ardupilot.html
 - Meier, L. et al. *"PIXHAWK: A micro aerial vehicle design for autonomous flight using onboard computer vision"*, Autonomous Robots, 2012.
+- BetaFlight project: https://github.com/betaflight/betaflight
+- BLHeli_32 / Bluejay ESC firmware: https://github.com/bitdump/BLHeli
 
 ### 控制算法
 - Bouabdallah, S., Noth, A. & Siegwart, R. *"PID vs LQ control techniques applied to an indoor micro quadrotor"*, IROS 2004.
